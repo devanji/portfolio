@@ -43,34 +43,56 @@ $(function() {
   // --------------------------------------------- //
   // Loader & Loading Animation Start
   // --------------------------------------------- //
+  function hideLoaderAndInitHeadline() {
+    const loaderContent = document.getElementById("loaderContent");
+    const loader = document.getElementById("loader");
+    if (loaderContent && !loaderContent.classList.contains("fade-out")) {
+      loaderContent.classList.add("fade-out");
+      setTimeout(() => {
+        if (loader) loader.classList.add("loaded");
+      }, 300);
+
+      gsap.set(".animate-headline", {y: 50, opacity: 0});
+      ScrollTrigger.batch(".animate-headline", {
+        interval: 0.1,
+        batchMax: 4,
+        duration: 6,
+        onEnter: batch => gsap.to(batch, {
+          opacity: 1, 
+          y: 0,
+          ease: 'sine',
+          stagger: {each: 0.15, grid: [1, 4]}, 
+          overwrite: true
+        }),
+        onLeave: batch => gsap.set(batch, {opacity: 1, y: 0, overwrite: true}),
+        onEnterBack: batch => gsap.to(batch, {opacity: 1, y: 0, stagger: 0.15, overwrite: true}),
+        onLeaveBack: batch => gsap.set(batch, {opacity: 0, y: 50, overwrite: true})
+      });
+    }
+  }
+
   const content = document.querySelector('body');
-  const imgLoad = imagesLoaded(content);
+  var loaderHidden = false;
 
-  imgLoad.on('done', instance => {
+  // Safety: hide loader after 5s if images hang (e.g. slow/blocked externals)
+  setTimeout(function() {
+    if (!loaderHidden) { loaderHidden = true; hideLoaderAndInitHeadline(); }
+  }, 5000);
 
-    document.getElementById("loaderContent").classList.add("fade-out");
-    setTimeout(() => {
-      document.getElementById("loader").classList.add("loaded");
-    }, 300);
-
-    gsap.set(".animate-headline", {y: 50, opacity: 0});
-    ScrollTrigger.batch(".animate-headline", {
-      interval: 0.1,
-      batchMax: 4,
-      duration: 6,
-      onEnter: batch => gsap.to(batch, {
-        opacity: 1, 
-        y: 0,
-        ease: 'sine',
-        stagger: {each: 0.15, grid: [1, 4]}, 
-        overwrite: true
-      }),
-      onLeave: batch => gsap.set(batch, {opacity: 1, y: 0, overwrite: true}),
-      onEnterBack: batch => gsap.to(batch, {opacity: 1, y: 0, stagger: 0.15, overwrite: true}),
-      onLeaveBack: batch => gsap.set(batch, {opacity: 0, y: 50, overwrite: true})
-    });
-
-  });
+  if (typeof imagesLoaded !== 'undefined' && content) {
+    try {
+      const imgLoad = imagesLoaded(content);
+      // Use 'always' so loader hides even when some images fail (404, network)
+      imgLoad.on('always', function() {
+        if (!loaderHidden) { loaderHidden = true; hideLoaderAndInitHeadline(); }
+      });
+    } catch (e) {
+      if (!loaderHidden) { loaderHidden = true; hideLoaderAndInitHeadline(); }
+    }
+  } else {
+    loaderHidden = true;
+    hideLoaderAndInitHeadline();
+  }
   // --------------------------------------------- //
   // Loader & Loading Animation End
   // --------------------------------------------- //
