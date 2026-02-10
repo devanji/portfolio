@@ -2,12 +2,14 @@
 
 $method = $_SERVER['REQUEST_METHOD'];
 
+// Set your email address where all form submissions will be sent
+$admin_email = 'senuridevanji8@gmail.com';
+
 //Script Foreach
 $c = true;
 if ( $method === 'POST' ) {
 
 	$project_name = trim($_POST["project_name"]);
-	$admin_email  = trim($_POST["admin_email"]);
 	$form_subject = trim($_POST["form_subject"]);
 
 	foreach ( $_POST as $key => $value ) {
@@ -23,7 +25,6 @@ if ( $method === 'POST' ) {
 } else if ( $method === 'GET' ) {
 
 	$project_name = trim($_GET["project_name"]);
-	$admin_email  = trim($_GET["admin_email"]);
 	$form_subject = trim($_GET["form_subject"]);
 
 	foreach ( $_GET as $key => $value ) {
